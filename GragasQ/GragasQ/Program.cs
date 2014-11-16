@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -159,7 +160,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj != null && (obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy"))
+            if (obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
             {
                 barrel = null;
             }
@@ -173,7 +174,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy")
+            if (obj.Name == "Gragas_Base_Q_Ally.troy")
             {
                 barrel = obj;
             }
@@ -240,7 +241,7 @@ namespace GragasQ
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Vector3.Distance(barrel.Position, enemy.Position) < barrel.BoundingRadius + enemy.BoundingRadius && enemy.IsEnemy && enemy.IsValid && !enemy.IsDead))
                 {
-                    float rangeAllow = barrel.BoundingRadius + enemy.BoundingRadius - 15;
+                    float rangeAllow = barrel.BoundingRadius + enemy.BoundingRadius - 25;
 
                     if (enemy.IsDashing() || 
                         Vector3.Distance(barrel.Position, enemy.Position) > rangeAllow)
@@ -278,8 +279,10 @@ namespace GragasQ
                 Player.SummonerSpellbook.CastSpell(IgniteSpellSlot, rTarget);
             }
 
-            if (qTarget != null && useQ && Q.IsReady() && barrel == null)
+            
+            if (qTarget != null && useQ && Q.IsReady())
             {
+                Game.PrintChat(barrel.Name);
                 if (Player.Distance(qTarget) < Q.Range)
                     Q.Cast(qTarget, false, true);
             }
@@ -301,11 +304,12 @@ namespace GragasQ
                 double extraDmg = 0;
                 double dfgDmg = 1.0;
 
-                if (DfgItem.IsReady() && Player.Distance(rTarget.ServerPosition) < DfgItem.Range)
+                if (useDFG && DfgItem.IsReady() && Player.Distance(rTarget.ServerPosition) < DfgItem.Range)
                 {
+                    extraDmg += Player.GetItemDamage(rTarget, Damage.DamageItems.Dfg);
                     dfgDmg = 1.2;
                 }
-                if (IgniteSpellSlot != SpellSlot.Unknown &&
+                if (useIgnite && IgniteSpellSlot != SpellSlot.Unknown &&
                     Player.SummonerSpellbook.CanUseSpell(IgniteSpellSlot) == SpellState.Ready)
                 {
                     extraDmg += ObjectManager.Player.GetSummonerSpellDamage(rTarget, Damage.SummonerSpell.Ignite);
