@@ -33,7 +33,6 @@ namespace GragasQ
 
         // Barrel
         private static Obj_GeneralParticleEmmiter barrel = null;
-        private static Obj_GeneralParticleEmmiter barrelNull = null;
 
         // Menu
         public static Menu Config;
@@ -218,14 +217,6 @@ namespace GragasQ
 
             Orbwalker.SetMovement(true);
 
-            if (barrel.Equals(barrelNull))
-            {
-                Game.PrintChat("a");
-            }
-            else
-            {
-                Game.PrintChat("b");
-            }
             if (Config.Item("QExplode").GetValue<bool>())
             {
                 BarrelExplode();
@@ -289,9 +280,8 @@ namespace GragasQ
             }
 
             
-            if (qTarget != null && useQ && Q.IsReady())
+            if (qTarget != null && useQ && Q.IsReady() && !barrel.IsVisible)
             {
-                Game.PrintChat(barrel.Name);
                 if (Player.Distance(qTarget) < Q.Range)
                     Q.Cast(qTarget, false, true);
             }
