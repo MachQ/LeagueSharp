@@ -280,7 +280,7 @@ namespace GragasQ
             }
 
             
-            if (qTarget != null && useQ && Q.IsReady() && !barrel.IsVisible)
+            if (qTarget != null && useQ && Q.IsReady())
             {
                 if (Player.Distance(qTarget) < Q.Range)
                     Q.Cast(qTarget, false, true);
