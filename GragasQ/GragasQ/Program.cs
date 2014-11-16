@@ -237,7 +237,7 @@ namespace GragasQ
 
         private static void BarrelExplode()
         {
-            if (barrel != null)
+            if (barrel.IsVisible)
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Vector3.Distance(barrel.Position, enemy.Position) < barrel.BoundingRadius + enemy.BoundingRadius && enemy.IsEnemy && enemy.IsValid && !enemy.IsDead))
                 {
