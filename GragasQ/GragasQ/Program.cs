@@ -145,7 +145,7 @@ namespace GragasQ
             // Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
             Game.PrintChat("<b>" + ChampionName + "Q</b> Loaded 2!");
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             GameObject.OnCreate += GameObject_OnCreate;
@@ -160,7 +160,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
+            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
             {
                 barrel = null;
             }
@@ -174,7 +174,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj.Name == "Gragas_Base_Q_Ally.troy")
+            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy")
             {
                 barrel = obj;
             }
@@ -214,7 +214,7 @@ namespace GragasQ
         static void Game_OnGameUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
-            Game.PrintChat("aa");
+            
             Orbwalker.SetMovement(true);
 
             if (Config.Item("QExplode").GetValue<bool>())
@@ -224,7 +224,6 @@ namespace GragasQ
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                Game.PrintChat("combo active");
                 Combo();
             }
             else
@@ -238,7 +237,7 @@ namespace GragasQ
 
         private static void BarrelExplode()
         {
-            if (barrel.IsVisible)
+            if (barrel != null)
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Vector3.Distance(barrel.Position, enemy.Position) < barrel.BoundingRadius + enemy.BoundingRadius && enemy.IsEnemy && enemy.IsValid && !enemy.IsDead))
                 {
@@ -267,7 +266,6 @@ namespace GragasQ
 
         private static void UseSpells(bool useQ, bool useW, bool useE, bool useR, bool useIgnite, bool useDFG)
         {
-            Game.PrintChat("I'm combo");
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
@@ -282,7 +280,7 @@ namespace GragasQ
             }
 
             
-            if (qTarget != null && useQ && Q.IsReady() && !barrel.IsVisible)
+            if (qTarget != null && useQ && Q.IsReady() && barrel is null)
             {
                 if (Player.Distance(qTarget) < Q.Range)
                     Q.Cast(qTarget, false, true);
