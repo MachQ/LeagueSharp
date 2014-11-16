@@ -240,7 +240,13 @@ namespace GragasQ
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Vector3.Distance(barrel.Position, enemy.Position) < barrel.BoundingRadius + enemy.BoundingRadius && enemy.IsEnemy && enemy.IsValid && !enemy.IsDead))
                 {
-                    Q.Cast();
+                    float rangeAllow = Q.Width - 15;
+
+                    if (enemy.IsDashing() || 
+                        Vector3.Distance(barrel.Position, enemy.Position) > rangeAllow)
+                    {
+                        Q.Cast();
+                    }
                 }
             }
         }
@@ -248,20 +254,29 @@ namespace GragasQ
         private static void Combo()
         {
             UseSpells(Config.Item("UseQCombo").GetValue<bool>(), Config.Item("UseWCombo").GetValue<bool>(),
-                Config.Item("UseECombo").GetValue<bool>(), Config.Item("UseRCombo").GetValue<bool>());
+                Config.Item("UseECombo").GetValue<bool>(), Config.Item("UseRCombo").GetValue<bool>(), Config.Item("UseIgniteCombo").GetValue<bool>(), Config.Item("UseDfgCombo").GetValue<bool>());
         }
 
         private static void Harass()
         {
             UseSpells(Config.Item("UseQHarass").GetValue<bool>(), false, Config.Item("UseEHarass").GetValue<bool>(),
-                false);
+                false,false,false);
         }
 
-        private static void UseSpells(bool useQ, bool useW, bool useE, bool useR)
+        private static void UseSpells(bool useQ, bool useW, bool useE, bool useR, bool useIgnite, bool useDFG)
         {
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
+            var igniteTarget = SimpleTs.GetTarget(600, SimpleTs.DamageType.Magical);
+
+            // Auto ignite
+            if (useIgnite && IgniteSpellSlot != SpellSlot.Unknown &&
+                Player.SummonerSpellbook.CanUseSpell(IgniteSpellSlot) == SpellState.Ready &&
+                igniteTarget != null && ObjectManager.Player.GetSummonerSpellDamage(igniteTarget, Damage.SummonerSpell.Ignite) > igniteTarget.Health)
+            {
+                Player.SummonerSpellbook.CastSpell(IgniteSpellSlot, rTarget);
+            }
 
             if (qTarget != null && useQ && Q.IsReady())
             {
@@ -298,13 +313,13 @@ namespace GragasQ
 
                 if (R.GetDamage(rTarget)*dfgDmg + extraDmg > rTarget.Health)
                 {
-                    CastIgniteDfg(rTarget);
+                    CastIgniteDfg(rTarget, useIgnite, useDFG);
                     R.Cast(rTarget, false, true);
                 }
                 if (Q.IsReady() &&
                     Q.GetDamage(rTarget) * dfgDmg + R.GetDamage(rTarget) * dfgDmg + extraDmg > rTarget.Health)
                 {
-                    CastIgniteDfg(rTarget);
+                    CastIgniteDfg(rTarget, useIgnite, useDFG);
                     Q.Cast(rTarget);
                     R.Cast(rTarget);
                 }
@@ -313,7 +328,7 @@ namespace GragasQ
                     if (eTarget != null &&
                         Q.GetDamage(eTarget) * dfgDmg + E.GetDamage(eTarget) * dfgDmg + R.GetDamage(eTarget) * dfgDmg + extraDmg > eTarget.Health)
                     {
-                        CastIgniteDfg(rTarget);
+                        CastIgniteDfg(rTarget, useIgnite, useDFG);
                         E.Cast(eTarget);
                         Q.Cast(qTarget);
                         R.Cast(rTarget);
@@ -321,9 +336,10 @@ namespace GragasQ
                     if (eTarget == null &&
                         Q.GetDamage(rTarget) + E.GetDamage(rTarget) * dfgDmg + R.GetDamage(rTarget) * dfgDmg + extraDmg > rTarget.Health)
                     {
-                        CastIgniteDfg(rTarget);
-                        Vector3 pos = rTarget.ServerPosition + Vector3.Normalize(rTarget.ServerPosition - ObjectManager.Player.ServerPosition) * R.Range;
-                        R.Cast(pos);
+                        CastIgniteDfg(rTarget, useIgnite, useDFG);
+                        Vector3 rPos = R.GetPrediction(rTarget).CastPosition;
+                        rPos = Player.ServerPosition + Vector3.Normalize(rPos) * (Player.Distance(rPos) + 300);
+                        R.Cast(rPos);
                     }
                 }
             }
@@ -331,13 +347,13 @@ namespace GragasQ
 
 
 
-        public static void CastIgniteDfg(Obj_AI_Base rTarget)
+        public static void CastIgniteDfg(Obj_AI_Base rTarget, bool useIgnite, bool useDFG)
         {
-            if (DfgItem.IsReady() && Player.Distance(rTarget.ServerPosition) < DfgItem.Range)
+            if (useDFG && DfgItem.IsReady() && Player.Distance(rTarget.ServerPosition) < DfgItem.Range)
             {
                 DfgItem.Cast(rTarget);
             }
-            if (IgniteSpellSlot != SpellSlot.Unknown &&
+            if (useIgnite && IgniteSpellSlot != SpellSlot.Unknown &&
                 Player.SummonerSpellbook.CanUseSpell(IgniteSpellSlot) == SpellState.Ready)
             {
                 Player.SummonerSpellbook.CastSpell(IgniteSpellSlot, rTarget);
