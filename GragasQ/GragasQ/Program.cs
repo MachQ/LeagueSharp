@@ -328,7 +328,7 @@ namespace GragasQ
                 }
                 if (Q.IsReady() && E.IsReady())
                 {
-                    if (eTarget != null &&
+                    if (Player.Distance(rTarget) <= 500 &&
                         Q.GetDamage(eTarget) * dfgDmg + E.GetDamage(eTarget) * dfgDmg + R.GetDamage(eTarget) * dfgDmg + extraDmg > eTarget.Health)
                     {
                         CastIgniteDfg(rTarget, useIgnite, useDFG);
@@ -336,7 +336,7 @@ namespace GragasQ
                         Q.Cast(qTarget);
                         R.Cast(rTarget);
                     }
-                    if (eTarget == null &&
+                    if (Player.Distance(rTarget) > 500 && Player.Distance(rTarget) <= R.Range &&
                         Q.GetDamage(rTarget) + E.GetDamage(rTarget) * dfgDmg + R.GetDamage(rTarget) * dfgDmg + extraDmg > rTarget.Health)
                     {
                         CastIgniteDfg(rTarget, useIgnite, useDFG);
