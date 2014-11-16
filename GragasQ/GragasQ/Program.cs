@@ -146,7 +146,7 @@ namespace GragasQ
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            Game.PrintChat("<b>" + ChampionName + "Q</b> Loaded!");
+            Game.PrintChat("<b>" + ChampionName + "Q</b> Loaded 2!");
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             GameObject.OnCreate += GameObject_OnCreate;
             GameObject.OnDelete += GameObject_OnDelete;
