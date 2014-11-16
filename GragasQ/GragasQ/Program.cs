@@ -266,10 +266,11 @@ namespace GragasQ
 
         private static void UseSpells(bool useQ, bool useW, bool useE, bool useR, bool useIgnite, bool useDFG)
         {
+            Game.PrintChat("I'm combo");
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
-            var igniteTarget = SimpleTs.GetTarget(600, SimpleTs.DamageType.Magical);
+            var igniteTarget = SimpleTs.GetTarget(600, SimpleTs.DamageType.True);
 
             // Auto ignite
             if (useIgnite && IgniteSpellSlot != SpellSlot.Unknown &&
