@@ -217,14 +217,7 @@ namespace GragasQ
 
             Orbwalker.SetMovement(true);
 
-            if (barrel.IsVisible)
-            {
-                Game.PrintChat("yes");
-            }
-            else
-            {
-                Game.PrintChat("nno");
-            }
+            Game.PrintChat(barrel.ToString());
             if (Config.Item("QExplode").GetValue<bool>())
             {
                 BarrelExplode();
