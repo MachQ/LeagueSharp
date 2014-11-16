@@ -224,6 +224,7 @@ namespace GragasQ
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
+                Game.PrintChat("combo active");
                 Combo();
             }
             else
