@@ -160,7 +160,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
+            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
             {
                 barrel = null;
             }
@@ -174,7 +174,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj.Name == "Gragas_Base_Q_Ally.troy")
+            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy")
             {
                 barrel = obj;
             }
