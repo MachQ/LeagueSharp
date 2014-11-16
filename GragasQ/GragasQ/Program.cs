@@ -278,7 +278,7 @@ namespace GragasQ
                 Player.SummonerSpellbook.CastSpell(IgniteSpellSlot, rTarget);
             }
 
-            if (qTarget != null && useQ && Q.IsReady())
+            if (qTarget != null && useQ && Q.IsReady() && barrel == null)
             {
                 if (Player.Distance(qTarget) < Q.Range)
                     Q.Cast(qTarget, false, true);
@@ -316,7 +316,7 @@ namespace GragasQ
                     CastIgniteDfg(rTarget, useIgnite, useDFG);
                     R.Cast(rTarget, false, true);
                 }
-                if (Q.IsReady() &&
+                if (Q.IsReady() && 
                     Q.GetDamage(rTarget) * dfgDmg + R.GetDamage(rTarget) * dfgDmg + extraDmg > rTarget.Health)
                 {
                     CastIgniteDfg(rTarget, useIgnite, useDFG);
