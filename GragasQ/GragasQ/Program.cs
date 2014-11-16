@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
@@ -24,6 +25,10 @@ namespace GragasQ
         public static Spell W;
         public static Spell E;
         public static Spell R;
+
+        //
+        public static Items.Item DfgItem;
+        public static SpellSlot IgniteSpellSlot;
 
         // Barrel
         private static Obj_GeneralParticleEmmiter barrel = null;
@@ -72,6 +77,11 @@ namespace GragasQ
             SpellList.Add(E);
             SpellList.Add(R);
 
+            IgniteSpellSlot = Player.GetSpellSlot("SummonerDot");
+            DfgItem = Utility.Map.GetMap()._MapType == Utility.Map.MapType.TwistedTreeline ||
+                  Utility.Map.GetMap()._MapType == Utility.Map.MapType.CrystalScar
+                ? new Items.Item(3188, 750)
+                : new Items.Item(3128, 750);
 
             // Create the menu
             Config = new Menu(ChampionName + "Q", ChampionName + "Q", true);
@@ -93,6 +103,8 @@ namespace GragasQ
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseDfgCombo", "Use Dfg").SetValue(true));
             Config.SubMenu("Combo")
                 .AddItem(new MenuItem("ComboActive", "Combo!").SetValue(
                     new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
@@ -180,6 +192,10 @@ namespace GragasQ
             {
                 R.Cast(unit);
             }
+            if (Player.Distance(unit) < E.Range)
+            {
+                E.Cast(unit);
+            }
         }
 
 
@@ -261,18 +277,71 @@ namespace GragasQ
                     E.Cast(eTarget);
             }
 
+            if (!E.IsReady())
+                if (useW && W.IsReady())
+                    W.Cast();
+
             if (rTarget != null && useR && R.IsReady())
             {
-                if (R.GetDamage(rTarget) > rTarget.Health)
-                    R.Cast(rTarget, false, true);
-                if (Q.GetDamage(rTarget) + R.GetDamage(rTarget) > rTarget.Health)
+                double extraDmg = 0;
+                double dfgDmg = 1.0;
+
+                if (DfgItem.IsReady() && Player.Distance(rTarget.ServerPosition) < DfgItem.Range)
                 {
-                    if (Q.IsReady())
-                        Q.Cast(rTarget);
+                    dfgDmg = 1.2;
+                }
+                if (IgniteSpellSlot != SpellSlot.Unknown &&
+                    Player.SummonerSpellbook.CanUseSpell(IgniteSpellSlot) == SpellState.Ready)
+                {
+                    extraDmg += ObjectManager.Player.GetSummonerSpellDamage(rTarget, Damage.SummonerSpell.Ignite);
+                }
+
+                if (R.GetDamage(rTarget)*dfgDmg + extraDmg > rTarget.Health)
+                {
+                    CastIgniteDfg(rTarget);
+                    R.Cast(rTarget, false, true);
+                }
+                if (Q.IsReady() &&
+                    Q.GetDamage(rTarget) * dfgDmg + R.GetDamage(rTarget) * dfgDmg + extraDmg > rTarget.Health)
+                {
+                    CastIgniteDfg(rTarget);
+                    Q.Cast(rTarget);
                     R.Cast(rTarget);
                 }
+                if (Q.IsReady() && E.IsReady())
+                {
+                    if (eTarget != null &&
+                        Q.GetDamage(eTarget) * dfgDmg + E.GetDamage(eTarget) * dfgDmg + R.GetDamage(eTarget) * dfgDmg + extraDmg > eTarget.Health)
+                    {
+                        CastIgniteDfg(rTarget);
+                        E.Cast(eTarget);
+                        Q.Cast(qTarget);
+                        R.Cast(rTarget);
+                    }
+                    if (eTarget == null &&
+                        Q.GetDamage(rTarget) + E.GetDamage(rTarget) * dfgDmg + R.GetDamage(rTarget) * dfgDmg + extraDmg > rTarget.Health)
+                    {
+                        CastIgniteDfg(rTarget);
+                        Vector3 pos = rTarget.ServerPosition + Vector3.Normalize(rTarget.ServerPosition - ObjectManager.Player.ServerPosition) * R.Range;
+                        R.Cast(pos);
+                    }
+                }
             }
+        }
 
+
+
+        public static void CastIgniteDfg(Obj_AI_Base rTarget)
+        {
+            if (DfgItem.IsReady() && Player.Distance(rTarget.ServerPosition) < DfgItem.Range)
+            {
+                DfgItem.Cast(rTarget);
+            }
+            if (IgniteSpellSlot != SpellSlot.Unknown &&
+                Player.SummonerSpellbook.CanUseSpell(IgniteSpellSlot) == SpellState.Ready)
+            {
+                Player.SummonerSpellbook.CastSpell(IgniteSpellSlot, rTarget);
+            }
         }
     }
 }
