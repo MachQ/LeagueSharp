@@ -160,7 +160,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
+            if (obj.Name == "Gragas_Base_Q_Ally.troy" || obj.Name == "Gragas_Base_Q_End.troy")
             {
                 barrel = null;
             }
@@ -174,7 +174,7 @@ namespace GragasQ
             }
 
             var obj = (Obj_GeneralParticleEmmiter)sender;
-            if (obj != null && obj.Name == "Gragas_Base_Q_Ally.troy")
+            if (obj.Name == "Gragas_Base_Q_Ally.troy")
             {
                 barrel = obj;
             }
@@ -214,7 +214,7 @@ namespace GragasQ
         static void Game_OnGameUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
-
+            Game.PrintChat("aa");
             Orbwalker.SetMovement(true);
 
             if (Config.Item("QExplode").GetValue<bool>())
